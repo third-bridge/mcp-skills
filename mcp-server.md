@@ -15,7 +15,7 @@ The server is registered under:
 - `title`: `Third Bridge Content Server`
 - `version`: `1.2.0`
 
-This server is public (no end-user authentication required) and internally scoped to the Third Bridge corpus configured for the target environment.
+This server requires end-user authentication via OAuth 2.1 (Authorization Code with PKCE) and is scoped to the Third Bridge corpus configured for the target environment.
 
 ## Capabilities
 
@@ -85,16 +85,34 @@ Both prompts are exposed through the MCP prompt capability so that compatible cl
 
 ## Authentication Model
 
-- This **public** content MCP server does **not** require end-user OAuth.
-- All requests are processed under a backend-scoped identity using:
-  - A configured `companyUuid` (via `ResourceEnvironmentUtils.CompanyUuid`).
-  - Infrastructure modules for AppConfig, Bedrock, and S3.
-- There is no user-specific data persistence, user profile storage, or write access to Third Bridge systems.
+- Protocol: **OAuth 2.0 Authorization Code with PKCE**
+  - Interactive browser flow for Claude Desktop and Claude Web.
+  - Short‑lived access tokens; refresh tokens for silent renewal.
+- Scopes (read‑only):
+  - `content.read` — access to curated Third Bridge transcripts and metadata
+  - `citations.read` — access to citation URLs/titles
+  - Additional scopes may be added, but write scopes are not supported.
+- Token validation:
+  - The MCP server validates incoming Bearer tokens using the provider’s JWKs/introspection.
+  - Audience/issuer checks enforce environment and tenant boundaries.
+- Tenant and corpus mapping:
+  - Tenant identity is derived from token claims.
+  - Allowed corpus is resolved from the tenant and environment; no open‑world access.
+- Claude integration:
+  - When installing the connector in Claude Desktop/Web, the user is guided through the OAuth consent screen.
+  - Register Claude’s Desktop and Web redirect URIs with your OAuth provider as instructed during connector setup.
+- Storage:
+  - The MCP server is stateless regarding user tokens; clients store and present tokens on each call.
+  - The server does not persist user profiles or session state.
+- Permissions:
+  - The server is strictly read‑only; there are no write, update, or delete operations.
 
 From the MCP Directory perspective:
 
-- No OAuth 2.0 flow is needed for connector installation.
-- No test user accounts are required; a single backend configuration is sufficient for validation.
+- OAuth 2.0 is required for connector installation and use.
+- Provide directory reviewers:
+  - OAuth client details (client ID, redirect URIs), and
+  - A test tenant/user with `content.read` scopes to validate flows.
 
 ## Data Sources and Storage
 
