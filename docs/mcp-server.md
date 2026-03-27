@@ -89,5 +89,5 @@ Below are example flows that illustrate how to use this server in practice. Each
 
 ## Support
 - Email: support@thirdbridge.com
-- Documentation: https://github.com/third-bridge/mcp-skills/docs
+- Documentation: https://claude.ai/artifacts/latest/06df453d-12ed-43c9-afb2-fe44bcb98541 
 - Issues: https://github.com/third-bridge/mcp-skills/issues
