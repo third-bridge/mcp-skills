@@ -66,6 +66,7 @@ For each workflow, decompose into **atomic research questions** and execute a ti
 | **Call 1** | Precision | `companyNames` + `sectors` + specific keywords. Default: 36 months |
 | **Call 2** | Expansion | If results < 3: drop `sectors`, use `companyTickers` only, broaden keywords |
 | **Call 3** | Value chain | If results < 3: drop all entity filters, search via keywords (synonyms, competitors, suppliers, customers) + 60 months |
+| **Deep-dive** | Single interview | Use `contentUuid` to restrict to one interview UUID (overrides all other filters). Use when you want to extract exhaustively from a specific high-signal transcript identified in earlier passes. |
 
 ### Decomposition guidance by complexity
 
@@ -97,14 +98,22 @@ Follow the output template specified in the relevant reference file. Every workf
 2. **Evidence-Based Analysis** — Structured by the workflow's key dimensions
 3. **Expert Consensus vs. Divergence** — Where experts agree and where they split
 4. **Information Gaps** — What couldn't be answered and suggested follow-up queries or expert calls
-5. **Citations** — Hyperlinked footnotes: `[[1]](URL "Content Title")`
+5. **Citations** — Use `citationKey` verbatim from each snippet (see rules below)
 
-### Citation format
-```
-[[1]](https://forum.thirdbridge.com/interview/uuid "Interview Title")
-```
+### Citation rules
 
-Never expose raw URLs in body text. Every factual claim needs a citation.
+The `third_bridge_content_query` tool returns a `citationKey` field in each snippet that is **already a complete, pre-formatted Markdown link** — containing both the URL and the interview title. You must:
+
+- **Use it verbatim.** Never reconstruct, modify, shorten, or renumber the `citationKey`.
+- **Only cite when `enableCitation: true`** on the snippet. Suppress citation for snippets where it is false.
+- **Place it after the claim, before the closing period:**
+
+  ✅ `Margins have compressed to single digits [[1]](url "Title").`
+  ❌ `[[1]](url "Title") Margins have compressed to single digits.`
+  ❌ `Margins have compressed to single digits [1].` ← bare number, not the full citationKey
+
+- **Reuse the same `citationKey`** when citing the same snippet more than once. Do not create a new citation for the same source.
+- **Never expose raw URLs** in body text outside of the citationKey link.
 
 ---
 
@@ -114,3 +123,21 @@ End every workflow output with:
 - **Unresolved questions** that would benefit from a targeted expert call
 - **Adjacent workflows** the user might want to run next (e.g., after a deal screen → commercial diligence)
 - **Monitoring triggers** — what changes in evidence would alter the conclusion
+
+### Expert Call Compliance Guardrails
+
+When suggesting follow-up expert calls, **never recommend connecting with individuals who would possess material non-public information (MNPI) about the entity under analysis.** This includes:
+
+- **No deal-involved parties:** Do not suggest calls with bankers, lenders, advisors, or counsel who worked on a specific financing, acquisition, or restructuring for the entity. (e.g., never: "a lender who worked on [Issuer]'s credit facility")
+- **No sponsor insiders on active situations:** Do not suggest calls with current or former employees of the PE sponsor specifically to discuss an active portfolio company's exit process, deal timeline, or capital structure decisions.
+- **No named counterparties to live transactions:** Do not suggest calls framed around extracting specifics of ongoing deal terms, pricing, or negotiation dynamics.
+
+**Instead, frame expert call suggestions around general industry expertise:**
+- ✅ "A leveraged finance professional with experience in [sector] capital structures"
+- ✅ "A former operations executive in [industry] who has navigated similar margin compression"
+- ✅ "A supply chain specialist covering [geography/vertical]"
+- ❌ "A lender who has worked on [Issuer]'s debt facilities"
+- ❌ "A [Sponsor] deal professional to discuss exit timeline"
+- ❌ "A former advisor on the [Issuer] refinancing"
+
+The goal is to suggest expert profiles who bring **sector and functional expertise** relevant to the unresolved question, not individuals with **deal-specific inside knowledge** of the entity.
